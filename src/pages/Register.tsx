@@ -33,7 +33,17 @@ export function Register() {
   const [modalMessage, setModalMessage] = useState('');
   const navigate = useNavigate(); // Usando o hook useNavigate
 
-  const validateForm = () => {
+  async function verifyCPF(formData: FormData) {
+      // Simulando checagem de CPF existente
+      const clientsRef = collection(db, 'clients');
+      const cpfQuery = query(clientsRef,where('cpf', '==', formData.cpf))
+      const cpfSnapshot = await getDocs(cpfQuery);
+      const hasExistingCPF = !cpfSnapshot.empty;
+
+      return hasExistingCPF;
+  }
+
+  const validateForm = async () => {
     const newErrors: FormErrors = {};
 
     if (!formData.fullName.trim()) {
@@ -63,6 +73,10 @@ export function Register() {
       newErrors.cpf = 'CPF inválido';
     }
 
+    if(await verifyCPF(formData)) {
+      newErrors.cpf = 'CPF já cadastrado';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -70,19 +84,12 @@ export function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    const isValid = await validateForm();
 
-    // Simulando checagem de CPF existente
-    const clientsRef = collection(db, 'clients');
-    const cpfQuery = query(clientsRef,where('cpf', '==', formData.cpf))
-    const cpfSnapshot = await getDocs(cpfQuery);
-    const hasExistingCPF = !cpfSnapshot.empty;
-
-    if (hasExistingCPF) {
-      setModalMessage('CPF já cadastrado. O cadastro é único por CPF.');
-      return setShowModal(true);
+    if (!isValid) {
+      return;
     }
-
+    
     await saveData();
     setShowModal(true);
   };
