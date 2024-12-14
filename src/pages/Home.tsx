@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
+import { exportFirestoreToExcel } from '../export';
 
 export function Home() {
   const navigate = useNavigate();
@@ -21,6 +22,16 @@ export function Home() {
           className="inline-flex items-center gap-2"
         >
           Clique aqui! <ArrowRight className="w-5 h-10" />
+        </Button>
+
+        <Button 
+          onClick={() => {
+
+            exportFirestoreToExcel();
+          }}
+          className="inline-flex items-center gap-2"
+        >
+          Exportar para Excel
         </Button>
       </div>
     </div>
